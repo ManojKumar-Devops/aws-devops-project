@@ -1,5 +1,4 @@
 import os
-import json
 import time
 import logging
 from flask import Flask, jsonify, request
@@ -28,7 +27,7 @@ REQUEST_LATENCY = Histogram(
     ['endpoint']
 )
 
-# Database connection
+
 def get_db_connection():
     return psycopg2.connect(
         host=os.getenv('DB_HOST', 'localhost'),
@@ -38,9 +37,11 @@ def get_db_connection():
         password=os.getenv('DB_PASSWORD', 'password')
     )
 
+
 @app.before_request
 def start_timer():
     request.start_time = time.time()
+
 
 @app.after_request
 def record_metrics(response):
@@ -53,6 +54,7 @@ def record_metrics(response):
     REQUEST_LATENCY.labels(endpoint=request.path).observe(latency)
     return response
 
+
 @app.route('/health', methods=['GET'])
 def health():
     return jsonify({
@@ -60,6 +62,7 @@ def health():
         'version': os.getenv('APP_VERSION', '1.0.0'),
         'environment': os.getenv('ENVIRONMENT', 'development')
     }), 200
+
 
 @app.route('/ready', methods=['GET'])
 def readiness():
@@ -71,9 +74,11 @@ def readiness():
         logger.error(f"Readiness check failed: {e}")
         return jsonify({'status': 'not ready', 'error': str(e)}), 503
 
+
 @app.route('/metrics', methods=['GET'])
 def metrics():
     return generate_latest(), 200, {'Content-Type': CONTENT_TYPE_LATEST}
+
 
 @app.route('/api/v1/items', methods=['GET'])
 def get_items():
@@ -88,6 +93,7 @@ def get_items():
     except Exception as e:
         logger.error(f"Error fetching items: {e}")
         return jsonify({'error': 'Internal server error'}), 500
+
 
 @app.route('/api/v1/items', methods=['POST'])
 def create_item():
@@ -110,6 +116,7 @@ def create_item():
         logger.error(f"Error creating item: {e}")
         return jsonify({'error': 'Internal server error'}), 500
 
+
 @app.route('/api/v1/items/<int:item_id>', methods=['GET'])
 def get_item(item_id):
     try:
@@ -125,6 +132,7 @@ def get_item(item_id):
     except Exception as e:
         logger.error(f"Error fetching item: {e}")
         return jsonify({'error': 'Internal server error'}), 500
+
 
 @app.route('/api/v1/items/<int:item_id>', methods=['PUT'])
 def update_item(item_id):
@@ -149,6 +157,7 @@ def update_item(item_id):
         logger.error(f"Error updating item: {e}")
         return jsonify({'error': 'Internal server error'}), 500
 
+
 @app.route('/api/v1/items/<int:item_id>', methods=['DELETE'])
 def delete_item(item_id):
     try:
@@ -165,6 +174,7 @@ def delete_item(item_id):
     except Exception as e:
         logger.error(f"Error deleting item: {e}")
         return jsonify({'error': 'Internal server error'}), 500
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.getenv('PORT', '5000')), debug=False)
