@@ -42,7 +42,7 @@ jobs:
         run: bandit -r app/src/ -ll
 
       - name: Run pip-audit (dependency vulnerabilities)
-        run: pip-audit -r app/requirements.txt --ignore-vuln GHSA-jfh8-c2jp-jgg --progress-spinner off
+        run: pip-audit -r app/requirements.txt --progress-spinner off
         continue-on-error: true
 
       - name: Lint Dockerfile with hadolint
@@ -51,12 +51,12 @@ jobs:
           dockerfile: Dockerfile
           ignore: DL3008,DL3013
 
-      - name: Validate Kubernetes manifests
-        uses: azure/k8s-lint@v1
-        with:
-          manifests: |
-            k8s/base/deployment.yaml
-            k8s/base/service.yaml
+      - name: Validate Kubernetes manifests with kubeconform
+        run: |
+          curl -sL https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz | tar xz
+          ./kubeconform -strict -summary \
+            k8s/base/deployment.yaml \
+            k8s/base/service.yaml \
             k8s/base/ingress.yaml
 
   # ─── Job 2: Test ─────────────────────────────────────────────────────────
