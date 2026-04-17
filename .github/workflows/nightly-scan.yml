@@ -1,0 +1,55 @@
+name: Nightly Security Scan & Dependency Update
+
+on:
+  schedule:
+    - cron: '0 2 * * *'   # 2am UTC daily
+  workflow_dispatch:
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: microapp
+
+jobs:
+  dependency-check:
+    name: OWASP Dependency Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run OWASP Dependency-Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: 'microapp'
+          path: '.'
+          format: 'HTML'
+          out: 'reports'
+
+      - name: Upload dependency check report
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-check-report
+          path: reports/
+
+  ecr-scan:
+    name: ECR Image Vulnerability Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Check ECR scan findings
+        run: |
+          FINDINGS=$(aws ecr describe-image-scan-findings \
+            --repository-name $ECR_REPOSITORY \
+            --image-id imageTag=latest \
+            --query 'imageScanFindings.findingSeverityCounts' \
+            --output json 2>/dev/null || echo '{}')
+          echo "ECR Scan Findings: $FINDINGS"
+          CRITICAL=$(echo $FINDINGS | jq -r '.CRITICAL // 0')
+          if [ "$CRITICAL" -gt "0" ]; then
+            echo "⚠️ $CRITICAL CRITICAL vulnerabilities found in latest image"
+          fi

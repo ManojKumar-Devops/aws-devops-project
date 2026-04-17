@@ -1,0 +1,14 @@
+apiVersion: v2
+name: microapp
+description: A production-grade microservice Helm chart for AWS/EKS
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - microservice
+  - flask
+  - kubernetes
+  - aws
+maintainers:
+  - name: DevOps Team
+home: https://github.com/your-org/aws-devops-project
