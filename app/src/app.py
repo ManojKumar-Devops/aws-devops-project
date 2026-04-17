@@ -6,7 +6,6 @@ from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
-# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s %(levelname)s %(name)s %(message)s'
@@ -15,7 +14,6 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
-# Prometheus metrics
 REQUEST_COUNT = Counter(
     'app_request_count_total',
     'Total request count',
@@ -177,4 +175,4 @@ def delete_item(item_id):
 
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0"  # nosec B104, port=int(os.getenv('PORT', '5000')), debug=False)
+    app.run(host='0.0.0.0', port=int(os.getenv('PORT', '5000')), debug=False)  # nosec B104
