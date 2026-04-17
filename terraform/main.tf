@@ -205,6 +205,7 @@ module "rds" {
   db_name  = "appdb"
   username = "appuser"
   port     = "5432"
+  family   = "postgres15"
 
   # Use AWS Secrets Manager for password
   manage_master_user_password = true
