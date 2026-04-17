@@ -15,6 +15,7 @@ env:
   AWS_REGION: us-east-1
   ECR_REPOSITORY: microapp
   EKS_CLUSTER_NAME: microapp-eks
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   # ─── Job 1: Lint & Security Scan ─────────────────────────────────────────
