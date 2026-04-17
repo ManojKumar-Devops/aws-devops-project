@@ -39,9 +39,8 @@ RUN chown -R appuser:appgroup /app
 
 USER appuser
 
-ENV PATH=/home/appuser/.local/bin:$PATH
-
-ENV PYTHONUNBUFFERED=1 \
+ENV PATH=/home/appuser/.local/bin:$PATH \
+    PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PORT=5000
 
