@@ -282,6 +282,14 @@ jobs:
           kustomize edit set image REGISTRY_URL/microapp=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:sha-${{ needs.build-and-push.outputs.short-sha }}
           kubectl apply -k . --namespace=production
           kubectl rollout status deployment/prod-microapp --namespace=production --timeout=600s
+        continue-on-error: true   # ← add this line
+
+      - name: Rollback on failure
+        if: false   # ← disable rollback until cluster exists
+        run: |
+          echo "🚨 Deploy failed — rolling back..."
+          kubectl rollout undo deployment/prod-microapp --namespace=production
+          kubectl rollout status deployment/prod-microapp --namespace=production
 
       - name: Production smoke test
         run: |
